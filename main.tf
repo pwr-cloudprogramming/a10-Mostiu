@@ -107,8 +107,16 @@ resource "aws_security_group" "server_sg" {
 # COGNITO RESOURCES
 resource "aws_cognito_user_pool" "main" {
   name = "TicTacToeUserPool"
+  mfa_configuration        = "OFF"
+  auto_verified_attributes = []
 
-  // Additional configuration here
+  password_policy {
+    minimum_length    = "6"
+    require_lowercase = false
+    require_numbers   = false
+    require_symbols   = false
+    require_uppercase = false
+  }
 }
 
 resource "aws_cognito_user_pool_client" "main" {

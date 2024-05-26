@@ -1,0 +1,16 @@
+{
+  "name": "a10-mostiu",
+  "version": "1.0.0",
+  "description": "- Course: *Cloud programming*\r - Group: W04IST-SI0828G # L # Programowanie w chmurze – Lab\r - Date: 21/4/2024",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  }
+}

@@ -34,7 +34,7 @@
     <div class="board" id="board" style="pointer-events: none;"></div>
     <h3 id="result"></h3>
     <script>
-        const SERVER_URL = 'ws://localhost:8080';  // Update this to your WebSocket server URL
+        const SERVER_URL = 'ws://YOUR_SERVER_IP:8080';  // Update this to your WebSocket server URL
         const ws = new WebSocket(SERVER_URL);
         let playerName = localStorage.getItem('username');
         let opponentName;
@@ -47,6 +47,8 @@
 
         ws.onopen = () => {
             console.log('WebSocket connection established');
+            // Send sign-in message
+            ws.send(JSON.stringify({ type: 'sign_in', name: playerName }));
         };
 
         ws.onmessage = (message) => {

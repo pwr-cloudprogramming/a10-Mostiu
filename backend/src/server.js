@@ -4,6 +4,7 @@ const WebSocket = require('ws');
 const path = require('path');
 const AWS = require('aws-sdk');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,6 +15,7 @@ const cognito = new AWS.CognitoIdentityServiceProvider({
 });
 
 app.use(bodyParser.json());
+app.use(cors()); // Enable CORS for all routes
 
 let players = {};
 let games = {};

@@ -40,7 +40,8 @@
     <div class="board" id="board" style="pointer-events: none;"></div>
     <h3 id="result"></h3>
     <script>
-        const ws = new WebSocket('ws://localhost:8080');
+        const SERVER_URL = 'ws://localhost:8080';  
+        const ws = new WebSocket(SERVER_URL);
         let playerName;
         let opponentName;
         let gameId;

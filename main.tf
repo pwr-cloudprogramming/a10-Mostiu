@@ -1,7 +1,6 @@
 # AWS PROVIDER
 provider "aws" {
   region                   = "us-east-1"
-  shared_credentials_files = ["C:/Users/tomas/.aws/credentials.txt"]
 }
 
 # SET UP VPC
@@ -121,7 +120,7 @@ resource "aws_instance" "server" {
   sudo apt-get install -y nodejs npm nginx
 
   # Clone the repository
-  git clone https://your-github-repository-url /home/ubuntu/tictactoe
+  git clone https://github.com/pwr-cloudprogramming/a10-Mostiu.git /home/ubuntu/tictactoe
 
   # Backend setup
   cd /home/ubuntu/tictactoe/backend/src
@@ -130,6 +129,10 @@ resource "aws_instance" "server" {
 
   # Frontend setup
   sudo cp -r /home/ubuntu/tictactoe/frontend/src/* /var/www/html/
+
+  # Replace SERVER_URL in index.html with actual backend IP
+  PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
+  sudo sed -i "s|const SERVER_URL = '.*';|const SERVER_URL = 'ws://"$PUBLIC_IP":8080';|" /var/www/html/index.html
 
   # Configure Nginx to serve the frontend files
   echo "server {
@@ -140,15 +143,6 @@ resource "aws_instance" "server" {
 
       location / {
           try_files \$uri \$uri/ =404;
-      }
-
-      location /api/ {
-          proxy_pass http://localhost:8080/;
-          proxy_http_version 1.1;
-          proxy_set_header Upgrade \$http_upgrade;
-          proxy_set_header Connection 'upgrade';
-          proxy_set_header Host \$host;
-          proxy_cache_bypass \$http_upgrade;
       }
   }" | sudo tee /etc/nginx/sites-available/default
 

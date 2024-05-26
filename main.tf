@@ -107,29 +107,47 @@ resource "aws_security_group" "server_sg" {
 # COGNITO RESOURCES
 resource "aws_cognito_user_pool" "main" {
   name = "TicTacToeUserPool"
-  mfa_configuration        = "OFF"
-  auto_verified_attributes = []
 
+  // Do not use email as username
+  username_attributes = []
 
+  // Allow email to be used as an alias for login
+  alias_attributes = ["email"]
+
+  // Automatically verify email
+  auto_verified_attributes = ["email"]
+
+  // Email verification settings
+  verification_message_template {
+    default_email_option = "CONFIRM_WITH_LINK"
+  }
+
+  // Email configuration
+  email_configuration {
+    email_sending_account = "COGNITO_DEFAULT"
+  }
+
+  // Password policy
   password_policy {
-    minimum_length    = "6"
+    minimum_length    = 6
     require_lowercase = false
     require_numbers   = false
     require_symbols   = false
     require_uppercase = false
   }
+
+  // Optional: User pool policies, MFA settings, etc.
 }
 
+# User pool client
 resource "aws_cognito_user_pool_client" "main" {
   name         = "TicTacToeAppClient"
   user_pool_id = aws_cognito_user_pool.main.id
 
-  explicit_auth_flows = [
-    "ALLOW_USER_PASSWORD_AUTH",
-    "ALLOW_REFRESH_TOKEN_AUTH",
-    "ALLOW_USER_SRP_AUTH",
-    "ALLOW_ADMIN_USER_PASSWORD_AUTH"
-  ]
+  explicit_auth_flows = ["ALLOW_USER_PASSWORD_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
+
+  // Optional: Prevent user pool client secret
+  generate_secret = false
 }
 
 

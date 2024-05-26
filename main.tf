@@ -102,6 +102,22 @@ resource "aws_security_group" "server_sg" {
   }
 }
 
+
+
+resource "aws_cognito_user_pool" "main" {
+  name = "TicTacToeUserPool"
+
+  // Additional configuration here
+}
+
+resource "aws_cognito_user_pool_client" "main" {
+  name         = "TicTacToeAppClient"
+  user_pool_id = aws_cognito_user_pool.main.id
+
+}
+
+
+
 # DEPLOY EC2 INSTANCE
 resource "aws_instance" "server" {
   ami                         = "ami-080e1f13689e07408"  
@@ -111,8 +127,8 @@ resource "aws_instance" "server" {
   associate_public_ip_address = true
   vpc_security_group_ids      = [aws_security_group.server_sg.id]
 
-  user_data = <<-EOF
-#!/bin/bash
+   user_data = <<-EOF
+  #!/bin/bash
   set -e  # Stop script execution on any error
 
   # Update system and install necessary packages
@@ -125,14 +141,22 @@ resource "aws_instance" "server" {
   # Backend setup
   cd /home/ubuntu/tictactoe/backend/src
   npm install
+
+  # Replace placeholders in server.js with actual values
+  sudo sed -i "s|YOUR_USER_POOL_ID|${aws_cognito_user_pool.main.id}|g" /home/ubuntu/tictactoe/backend/src/server.js
+  sudo sed -i "s|YOUR_APP_CLIENT_ID|${aws_cognito_user_pool_client.main.id}|g" /home/ubuntu/tictactoe/backend/src/server.js
+
   nohup node server.js > /dev/null 2>&1 &
 
   # Frontend setup
   sudo cp -r /home/ubuntu/tictactoe/frontend/src/* /var/www/html/
 
-  # Replace SERVER_URL in index.html with actual backend IP
+  # Replace placeholders in frontend files with actual values
   PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
   sudo sed -i "s|const SERVER_URL = '.*';|const SERVER_URL = 'ws://"$PUBLIC_IP":8080';|" /var/www/html/index.html
+  sudo sed -i "s|const SERVER_URL = '.*';|const SERVER_URL = 'ws://"$PUBLIC_IP":8080';|" /var/www/html/game.html
+  sudo sed -i "s|YOUR_USER_POOL_ID|${aws_cognito_user_pool.main.id}|g" /var/www/html/game.html
+  sudo sed -i "s|YOUR_APP_CLIENT_ID|${aws_cognito_user_pool_client.main.id}|g" /var/www/html/game.html
 
   # Configure Nginx to serve the frontend files
   echo "server {
@@ -150,7 +174,7 @@ resource "aws_instance" "server" {
   sudo systemctl restart nginx
   sudo systemctl enable nginx
 
-EOF
+  EOF
 
   tags = {
     Name = "TicTacToeServer"

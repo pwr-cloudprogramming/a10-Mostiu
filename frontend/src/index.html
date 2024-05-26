@@ -1,172 +1,89 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tic-Tac-Toe</title>
+    <title>Tic-Tac-Toe Sign-In/Sign-Up</title>
     <style>
-        /* Add some basic styling */
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-gap: 5px;
-            margin-top: 20px;
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
         }
-        .cell {
-            width: 100px;
-            height: 100px;
-            background-color: #eee;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
+        .form-container {
+            display: inline-block;
+            text-align: left;
+        }
+        input, button {
+            display: block;
+            margin: 10px 0;
+            width: 100%;
+        }
+        button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
             cursor: pointer;
-        }
-        .cell.taken {
-            cursor: not-allowed;
         }
     </style>
 </head>
 <body>
-    <div>
-        <input type="text" id="name" placeholder="Enter your name" />
-        <input type="password" id="password" placeholder="Enter your password" />
+    <h1>Tic-Tac-Toe</h1>
+    <div class="form-container">
+        <h2>Sign Up</h2>
+        <input type="text" id="signup-username" placeholder="Enter your username" />
+        <input type="password" id="signup-password" placeholder="Enter your password" />
+        <input type="email" id="signup-email" placeholder="Enter your email" />
         <button onclick="signUp()">Sign Up</button>
+    </div>
+    <div class="form-container">
+        <h2>Sign In</h2>
+        <input type="text" id="signin-username" placeholder="Enter your username" />
+        <input type="password" id="signin-password" placeholder="Enter your password" />
         <button onclick="signIn()">Sign In</button>
     </div>
-    <div>
-        <h3>Players to choose from</h3>
-        <ul id="players"></ul>
-    </div>
-    <h3>Board</h3>
-    <div class="board" id="board" style="pointer-events: none;"></div>
-    <h3 id="result"></h3>
     <script>
-        const SERVER_URL = 'ws://localhost:8080';  
-        const ws = new WebSocket(SERVER_URL);
-        let playerName;
-        let opponentName;
-        let gameId;
-
-        ws.onopen = () => {
-            console.log('WebSocket connection established');
-        };
-
-        ws.onmessage = (message) => {
-            const data = JSON.parse(message.data);
-            console.log('Received message:', data);
-
-            switch (data.type) {
-                case 'players':
-                    updatePlayerList(data.players);
-                    break;
-                case 'game_start':
-                    console.log('Game start message received');
-                    opponentName = data.opponent;
-                    gameId = data.gameId;
-                    document.getElementById('board').style.pointerEvents = 'auto';
-                    document.getElementById('result').innerText = '';
-                    initializeBoard();
-                    break;
-                case 'game_update':
-                    updateBoard(data.game.board);
-                    break;
-                case 'game_result':
-                    displayResult(data.result);
-                    break;
-                case 'error':
-                    alert(data.message);
-                    break;
-                default:
-                    console.log('Unknown message type:', data.type);
-            }
-        };
-
-        ws.onerror = (error) => {
-            console.log('WebSocket error:', error);
-        };
-
-        ws.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
+        const SERVER_URL = 'http://localhost:8080';  // Update this to your server URL
 
         function signUp() {
-            const name = document.getElementById('name').value;
-            const password = document.getElementById('password').value;
-            if (name && password) {
-                playerName = name;
-                ws.send(JSON.stringify({ type: 'sign_up', name, password }));
-            } else {
-                alert('Please enter both nickname and password');
-            }
-        }
+            const username = document.getElementById('signup-username').value;
+            const password = document.getElementById('signup-password').value;
+            const email = document.getElementById('signup-email').value;
 
-        function signIn() {
-            const name = document.getElementById('name').value;
-            const password = document.getElementById('password').value;
-            if (name && password) {
-                playerName = name;
-                ws.send(JSON.stringify({ type: 'sign_in', name, password }));
-            } else {
-                alert('Please enter both nickname and password');
-            }
-        }
-
-        function updatePlayerList(players) {
-            const playerList = document.getElementById('players');
-            playerList.innerHTML = '';
-            players.forEach(player => {
-                if (player !== playerName) {
-                    const li = document.createElement('li');
-                    li.innerText = player;
-                    li.onclick = () => startGame(player);
-                    playerList.appendChild(li);
+            fetch(`${SERVER_URL}/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert('Sign up successful!');
                 }
             });
         }
 
-        function startGame(opponent) {
-            console.log('Starting game with:', opponent);
-            ws.send(JSON.stringify({ type: 'start_game', opponent }));
-        }
+        function signIn() {
+            const username = document.getElementById('signin-username').value;
+            const password = document.getElementById('signin-password').value;
 
-        function initializeBoard() {
-            console.log('Initializing board');
-            const boardDiv = document.getElementById('board');
-            boardDiv.innerHTML = '';
-            for (let i = 0; i < 9; i++) {
-                const cellDiv = document.createElement('div');
-                cellDiv.className = 'cell';
-                cellDiv.id = 'cell-' + i;
-                cellDiv.onclick = () => makeMove(i);
-                boardDiv.appendChild(cellDiv);
-            }
-            console.log('Board initialized');
-        }
-
-        function updateBoard(board) {
-            console.log('Updating board:', board);
-            for (let i = 0; i < board.length; i++) {
-                const cellDiv = document.getElementById('cell-' + i);
-                cellDiv.innerText = board[i];
-                if (board[i] !== null) {
-                    cellDiv.classList.add('taken');
-                    cellDiv.onclick = null;
+            fetch(`${SERVER_URL}/signin`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('token', data.data.IdToken);  // Store the ID token for authentication
+                    alert('Sign in successful!');
+                    window.location.href = 'game.html';
                 }
-            }
-        }
-
-        function makeMove(index) {
-            console.log('Making move at index:', index);
-            ws.send(JSON.stringify({ type: 'make_move', gameId, index }));
-        }
-
-        function displayResult(result) {
-            const resultDiv = document.getElementById('result');
-            if (result === 'draw') {
-                resultDiv.innerText = 'The game is a draw!';
-            } else {
-                resultDiv.innerText = `Player ${result} wins!`;
-            }
-            document.getElementById('board').style.pointerEvents = 'none';
+            });
         }
     </script>
 </body>

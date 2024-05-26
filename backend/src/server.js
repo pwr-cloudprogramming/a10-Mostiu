@@ -2,44 +2,84 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
+const AWS = require('aws-sdk');
+const bodyParser = require('body-parser');
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-let players = {};
-let games = {}; 
-let userCredentials = {}; 
+const cognito = new AWS.CognitoIdentityServiceProvider({
+    region: 'us-east-1'
+});
 
+app.use(bodyParser.json());
+
+let players = {};
+let games = {};
+
+// Cognito sign-up endpoint
+app.post('/signup', (req, res) => {
+    const { username, password, email } = req.body;
+
+    const params = {
+        ClientId: 'YOUR_APP_CLIENT_ID', // Replace with your App Client ID
+        Username: username,
+        Password: password,
+        UserAttributes: [
+            {
+                Name: 'email',
+                Value: email
+            }
+        ]
+    };
+
+    cognito.signUp(params, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json({ message: 'User signed up', data });
+        }
+    });
+});
+
+// Cognito sign-in endpoint
+app.post('/signin', (req, res) => {
+    const { username, password } = req.body;
+
+    const params = {
+        AuthFlow: 'USER_PASSWORD_AUTH',
+        ClientId: 'YOUR_APP_CLIENT_ID', // Replace with your App Client ID
+        AuthParameters: {
+            USERNAME: username,
+            PASSWORD: password
+        }
+    };
+
+    cognito.initiateAuth(params, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json({ message: 'User signed in', data });
+        }
+    });
+});
 
 wss.on('connection', (ws) => {
     console.log('New client connected');
-    
+
     ws.on('message', (message) => {
         const data = JSON.parse(message);
         console.log('Received message:', data);
-        
+
         switch (data.type) {
             case 'sign_up':
-                if (userCredentials[data.name]) {
-                    ws.send(JSON.stringify({ type: 'error', message: 'Nickname already taken' }));
-                } else {
-                    userCredentials[data.name] = data.password;
-                    players[data.name] = ws;
-                    ws.name = data.name;
-                    console.log(`Player signed up: ${data.name}`);
-                    broadcastPlayers();
-                }
+                ws.send(JSON.stringify({ type: 'error', message: 'Sign-up should be done via HTTP POST /signup' }));
                 break;
             case 'sign_in':
-                if (userCredentials[data.name] && userCredentials[data.name] === data.password) {
-                    players[data.name] = ws;
-                    ws.name = data.name;
-                    console.log(`Player signed in: ${data.name}`);
-                    broadcastPlayers();
-                } else {
-                    ws.send(JSON.stringify({ type: 'error', message: 'Invalid nickname or password' }));
-                }
+                ws.send(JSON.stringify({ type: 'error', message: 'Sign-in should be done via HTTP POST /signin' }));
                 break;
             case 'start_game':
                 if (players[data.opponent]) {
@@ -125,8 +165,6 @@ function checkWinner(board) {
         return board[a] && board[a] === board[b] && board[a] === board[c];
     });
 }
-
-
 
 server.listen(8080, '0.0.0.0', () => {
     console.log('Server is listening on port 8080');

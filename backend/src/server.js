@@ -41,7 +41,19 @@ app.post('/signup', (req, res) => {
             console.log(err);
             res.status(500).json({ error: err.message });
         } else {
-            res.json({ message: 'User signed up', data });
+            // Automatically confirm the user
+            const confirmParams = {
+                UserPoolId: 'YOUR_USER_POOL_ID', // Replace with your User Pool ID
+                Username: username
+            };
+            cognito.adminConfirmSignUp(confirmParams, (confirmErr, confirmData) => {
+                if (confirmErr) {
+                    console.log(confirmErr);
+                    res.status(500).json({ error: confirmErr.message });
+                } else {
+                    res.json({ message: 'User signed up and confirmed', data });
+                }
+            });
         }
     });
 });

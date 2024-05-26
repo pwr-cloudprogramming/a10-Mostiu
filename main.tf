@@ -108,16 +108,9 @@ resource "aws_security_group" "server_sg" {
 resource "aws_cognito_user_pool" "main" {
   name = "TicTacToeUserPool"
   mfa_configuration        = "OFF"
-  username_attributes = ["email"]
-  auto_verified_attributes = ["email"]
+  auto_verified_attributes = []
 
-  verification_message_template {
-    default_email_option = "CONFIRM_WITH_CODE"
-  }
 
-  email_configuration {
-    email_sending_account = "COGNITO_DEFAULT"
-  }
   password_policy {
     minimum_length    = "6"
     require_lowercase = false

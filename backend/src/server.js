@@ -10,9 +10,8 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const cognito = new AWS.CognitoIdentityServiceProvider({
-    region: 'us-east-1'
-});
+AWS.config.update({ region: 'us-east-1' });
+const cognito = new AWS.CognitoIdentityServiceProvider();
 
 app.use(bodyParser.json());
 app.use(cors()); // Enable CORS for all routes
@@ -89,11 +88,11 @@ wss.on('connection', (ws) => {
         console.log('Received message:', data);
 
         switch (data.type) {
-            case 'sign_up':
-                ws.send(JSON.stringify({ type: 'error', message: 'Sign-up should be done via HTTP POST /signup' }));
-                break;
             case 'sign_in':
-                ws.send(JSON.stringify({ type: 'error', message: 'Sign-in should be done via HTTP POST /signin' }));
+                players[data.name] = ws;
+                ws.name = data.name;
+                console.log(`Player signed in: ${data.name}`);
+                broadcastPlayers();
                 break;
             case 'start_game':
                 if (players[data.opponent]) {
@@ -140,7 +139,7 @@ wss.on('connection', (ws) => {
 });
 
 function broadcastPlayers() {
-    const playerList = Object.keys(players);
+    const playerList = Object.keys(players).filter(player => players[player]);
     console.log('Broadcasting players:', playerList);
     wss.clients.forEach(client => {
         if (client.readyState === WebSocket.OPEN) {

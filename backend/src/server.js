@@ -25,7 +25,7 @@ app.post('/signup', (req, res) => {
 
     const params = {
         ClientId: 'YOUR_APP_CLIENT_ID', // Replace with your App Client ID
-        Username: username,
+        Username: email,
         Password: password,
         UserAttributes: [
             {

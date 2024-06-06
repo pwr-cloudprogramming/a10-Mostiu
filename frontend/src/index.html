@@ -106,6 +106,7 @@
                     localStorage.setItem('username', username);
                     localStorage.setItem('token', data.data.IdToken);  // Store the ID token for authentication
                     alert('Sign in successful!');
+                    alert('Your token is: ' + data.data.IdToken);
                     window.location.href = 'game.html';
                 }
             });

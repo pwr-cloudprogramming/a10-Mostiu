@@ -5,6 +5,9 @@ const path = require('path');
 const AWS = require('aws-sdk');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const jwkToPem = require('jwk-to-pem');
+const axios = require('axios');
 
 const app = express();
 const server = http.createServer(app);
@@ -18,6 +21,38 @@ app.use(cors()); // Enable CORS for all routes
 
 let players = {};
 let games = {};
+
+// Function to verify JWT token
+const verifyToken = async (token) => {
+    const jwksUrl = `https://cognito-idp.us-east-1.amazonaws.com/YOUR_USER_POOL_ID/.well-known/jwks.json`;
+    const { data } = await axios.get(jwksUrl);
+    const pems = {};
+    data.keys.forEach(key => {
+        pems[key.kid] = jwkToPem(key);
+    });
+
+    const decodedJwt = jwt.decode(token, { complete: true });
+
+    if (!decodedJwt) {
+        throw new Error('Not a valid JWT token');
+    }
+
+    const pem = pems[decodedJwt.header.kid];
+
+    if (!pem) {
+        throw new Error('Invalid token');
+    }
+
+    return new Promise((resolve, reject) => {
+        jwt.verify(token, pem, { algorithms: ['RS256'] }, (err, payload) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(payload);
+            }
+        });
+    });
+};
 
 // Cognito sign-up endpoint
 app.post('/signup', (req, res) => {
@@ -88,62 +123,77 @@ app.post('/signin', (req, res) => {
     });
 });
 
-wss.on('connection', (ws) => {
-    console.log('New client connected');
+// WebSocket connection with token verification
+wss.on('connection', async (ws, req) => {
+    const token = req.url.split('?token=')[1];
 
-    ws.on('message', (message) => {
-        const data = JSON.parse(message);
-        console.log('Received message:', data);
+    if (!token) {
+        ws.close(1008, 'Token is required');
+        return;
+    }
 
-        switch (data.type) {
-            case 'sign_in':
-                players[data.name] = ws;
-                ws.name = data.name;
-                console.log(`Player signed in: ${data.name}`);
-                broadcastPlayers();
-                break;
-            case 'start_game':
-                if (players[data.opponent]) {
-                    const gameId = `${ws.name}-${data.opponent}`;
-                    games[gameId] = {
-                        board: Array(9).fill(null),
-                        turn: ws.name,
-                        players: [ws.name, data.opponent]
-                    };
-                    console.log(`Game started between ${ws.name} and ${data.opponent}`);
-                    players[data.opponent].send(JSON.stringify({ type: 'game_start', opponent: ws.name, gameId }));
-                    ws.send(JSON.stringify({ type: 'game_start', opponent: data.opponent, gameId }));
-                } else {
-                    console.log(`Opponent ${data.opponent} not found`);
-                }
-                break;
-            case 'make_move':
-                const game = games[data.gameId];
-                if (game && game.turn === ws.name && game.board[data.index] === null) {
-                    game.board[data.index] = ws.name;
-                    if (checkWinner(game.board)) {
-                        console.log(`Player ${ws.name} wins!`);
-                        broadcastGameResult(game, ws.name);
-                    } else if (game.board.every(cell => cell !== null)) {
-                        console.log(`Game is a draw`);
-                        broadcastGameResult(game, 'draw');
+    try {
+        const payload = await verifyToken(token);
+        console.log('Token verified', payload);
+
+        ws.on('message', (message) => {
+            const data = JSON.parse(message);
+            console.log('Received message:', data);
+
+            switch (data.type) {
+                case 'sign_in':
+                    players[data.name] = ws;
+                    ws.name = data.name;
+                    console.log(`Player signed in: ${data.name}`);
+                    broadcastPlayers();
+                    break;
+                case 'start_game':
+                    if (players[data.opponent]) {
+                        const gameId = `${ws.name}-${data.opponent}`;
+                        games[gameId] = {
+                            board: Array(9).fill(null),
+                            turn: ws.name,
+                            players: [ws.name, data.opponent]
+                        };
+                        console.log(`Game started between ${ws.name} and ${data.opponent}`);
+                        players[data.opponent].send(JSON.stringify({ type: 'game_start', opponent: ws.name, gameId }));
+                        ws.send(JSON.stringify({ type: 'game_start', opponent: data.opponent, gameId }));
                     } else {
-                        game.turn = game.players.find(p => p !== ws.name);
-                        console.log(`Move made by ${ws.name} at index ${data.index}`);
-                        broadcastGameUpdate(game);
+                        console.log(`Opponent ${data.opponent} not found`);
                     }
-                } else {
-                    console.log(`Invalid move by ${ws.name} at index ${data.index}`);
-                }
-                break;
-        }
-    });
+                    break;
+                case 'make_move':
+                    const game = games[data.gameId];
+                    if (game && game.turn === ws.name && game.board[data.index] === null) {
+                        game.board[data.index] = ws.name;
+                        if (checkWinner(game.board)) {
+                            console.log(`Player ${ws.name} wins!`);
+                            broadcastGameResult(game, ws.name);
+                        } else if (game.board.every(cell => cell !== null)) {
+                            console.log(`Game is a draw`);
+                            broadcastGameResult(game, 'draw');
+                        } else {
+                            game.turn = game.players.find(p => p !== ws.name);
+                            console.log(`Move made by ${ws.name} at index ${data.index}`);
+                            broadcastGameUpdate(game);
+                        }
+                    } else {
+                        console.log(`Invalid move by ${ws.name} at index ${data.index}`);
+                    }
+                    break;
+            }
+        });
 
-    ws.on('close', () => {
-        console.log('Client disconnected:', ws.name);
-        delete players[ws.name];
-        broadcastPlayers();
-    });
+        ws.on('close', () => {
+            console.log('Client disconnected:', ws.name);
+            delete players[ws.name];
+            broadcastPlayers();
+        });
+
+    } catch (error) {
+        console.error('Token verification failed:', error);
+        ws.close(1008, 'Invalid token');
+    }
 });
 
 function broadcastPlayers() {

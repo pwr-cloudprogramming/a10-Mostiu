@@ -85,3 +85,35 @@ Zrzut ekranu podczas gry:
 Zrzut ekranu podczas wylogowywania:
 
 ![logoff](imgs/logoff.png)
+
+
+### Refleksje i wnioski
+
+#### Korzystanie z AWS Cognito
+
+AWS Cognito jest potężnym narzędziem do zarządzania uwierzytelnianiem użytkowników oraz autoryzacją w aplikacjach internetowych i mobilnych. Integracja Cognito z aplikacją TicTacToe była relatywnie prosta i intuicyjna, co znacząco przyspieszyło proces wdrażania funkcji związanych z zarządzaniem użytkownikami.
+
+**Zalety korzystania z Cognito:**
+1. **Łatwość integracji:** AWS Cognito oferuje gotowe do użycia funkcje API, które można łatwo zintegrować z aplikacją, co oszczędza czas i wysiłek programistyczny.
+2. **Bezpieczeństwo:** Cognito zapewnia wysokie standardy bezpieczeństwa, w tym zarządzanie tożsamościami i dostępem, co jest kluczowe dla ochrony danych użytkowników.
+3. **Automatyzacja:** Automatyczne zarządzanie procesami rejestracji, weryfikacji email oraz logowania użytkowników sprawia, że zarządzanie użytkownikami staje się mniej obciążające.
+4. **Skalowalność:** Cognito jest skalowalne, co oznacza, że można go używać w małych aplikacjach, jak i dużych systemach z milionami użytkowników.
+
+#### Czego się nauczyłam/em?
+
+Podczas tego projektu nauczyłam/em się:
+- Jak konfigurować i zarządzać infrastrukturą AWS za pomocą Terraform.
+- Jak zintegrować AWS Cognito z aplikacją Node.js.
+- Jak konfigurować i zarządzać instancjami EC2, grupami zabezpieczeń oraz innymi zasobami AWS.
+
+#### Napotkane trudności
+
+Wyzwaniem z początku było poprawne skonfigurowanie AWS Cognito i zintegrowanie go z aplikacją, aby wszystkie funkcje działały zgodnie z oczekiwaniami, jednakże udało osiągnąć się ten cel.
+
+#### Co mnie najbardziej zaskoczyło?
+
+Najbardziej zaskoczyła mnie elastyczność i łatwość integracji AWS Cognito. Mimo początkowych trudności z konfiguracją, okazało się, że Cognito jest bardzo wszechstronnym narzędziem, które znacznie upraszcza zarządzanie użytkownikami i ich autoryzacją w aplikacjach.
+
+### Podsumowanie
+
+Projekt ten dostarczył mi cennych doświadczeń związanych z wykorzystaniem Terraform i AWS do budowy skalowalnych i bezpiecznych aplikacji webowych. AWS Cognito okazało się niezastąpionym narzędziem w zakresie zarządzania tożsamościami użytkowników, a jego łatwość użycia i wysoki poziom bezpieczeństwa sprawiają, że jest to idealne rozwiązanie dla nowoczesnych aplikacji.

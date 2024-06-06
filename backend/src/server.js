@@ -45,6 +45,26 @@ app.post('/signup', (req, res) => {
     });
 });
 
+// Cognito verify endpoint
+app.post('/verify', (req, res) => {
+    const { username, code } = req.body;
+
+    const params = {
+        ClientId: 'YOUR_APP_CLIENT_ID', // Replace with your App Client ID
+        Username: username,
+        ConfirmationCode: code
+    };
+
+    cognito.confirmSignUp(params, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json({ message: 'User verified', data });
+        }
+    });
+});
+
 // Cognito sign-in endpoint
 app.post('/signin', (req, res) => {
     const { username, password } = req.body;

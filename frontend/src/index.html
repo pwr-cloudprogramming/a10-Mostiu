@@ -36,6 +36,12 @@
         <button onclick="signUp()">Sign Up</button>
     </div>
     <div class="form-container">
+        <h2>Verify Code</h2>
+        <input type="text" id="verify-username" placeholder="Enter your username" />
+        <input type="text" id="verification-code" placeholder="Enter verification code" />
+        <button onclick="verifyCode()">Verify Code</button>
+    </div>
+    <div class="form-container">
         <h2>Sign In</h2>
         <input type="text" id="signin-username" placeholder="Enter your username" />
         <input type="password" id="signin-password" placeholder="Enter your password" />
@@ -59,7 +65,26 @@
                 if (data.error) {
                     alert(data.error);
                 } else {
-                    alert('Sign up successful!');
+                    alert('Sign up successful! Please check your email for the verification code.');
+                }
+            });
+        }
+
+        function verifyCode() {
+            const username = document.getElementById('verify-username').value;
+            const code = document.getElementById('verification-code').value;
+
+            fetch(`${SERVER_URL}/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert('Verification successful! You can now sign in.');
                 }
             });
         }

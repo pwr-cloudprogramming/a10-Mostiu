@@ -41,3 +41,47 @@ Instancja EC2 `TicTacToeServer` jest uruchomiona w publicznym subnecie i skonfig
 ### Podsumowanie
 
 Konfiguracja infrastruktury przy użyciu Terraform i AWS zapewnia skalowalne i bezpieczne środowisko dla gry TicTacToe. VPC zapewnia izolację sieciową, subnety umożliwiają rozdzielenie zasobów publicznych i prywatnych, internet gateway i tablice routingu umożliwiają komunikację z internetem, grupy zabezpieczeń kontrolują ruch sieciowy, a zasoby Cognito zarządzają uwierzytelnianiem użytkowników. Wszystkie te elementy razem tworzą kompleksowe i efektywne rozwiązanie do hostowania aplikacji webowej.
+
+### Podgląd
+
+Zrzuty ekranu aplikacji demonstrują pomyślne wdrożenie i funkcjonowanie gry TicTacToe hostowanej na infrastrukturze AWS. Zrzuty ekranu obejmują wynik zastosowania Terraform, sesje gry oraz widoki konsoli AWS dla uruchomionej instancji EC2 i jej konfiguracji.
+
+Zrzut ekranu działających instancji EC2:
+
+![ec2_running](imgs/ec2instance.png)
+
+Zrzut ekranu grup zabezpieczeń:
+
+![sgs](imgs/sgs.png)
+
+Zrzut ekranu puli użytkowników Cognito:
+
+![cognito_pool](imgs/cognito.png)
+
+Zrzut ekranu podczas rejestracji:
+
+![sign_up](imgs/sign_up.png)
+
+Zrzut ekranu z potwierdzeniem e-mail:
+
+![mail_confirmation](imgs/mail_confirmation.png)
+
+Zrzut ekranu podczas weryfikacji:
+
+![verification](imgs/verification.png)
+
+Zrzut ekranu podczas logowania:
+
+![sign_in](imgs/sign_in.png)
+
+Zrzut ekranu z otrzymanym tokenem IdToken:
+
+![received_id_token](imgs/receivedIdToken.png)
+
+Zrzut ekranu podczas gry:
+
+![gameplay](imgs/gameplay.png)
+
+Zrzut ekranu podczas wylogowywania:
+
+![logoff](imgs/logoff.png)

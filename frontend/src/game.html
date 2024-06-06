@@ -44,7 +44,8 @@
     <button class="button" onclick="logOff()">Log Off</button>
     <script>
         const SERVER_URL = 'ws://YOUR_SERVER_IP:8080';  // Update this to your WebSocket server URL
-        const ws = new WebSocket(SERVER_URL);
+        const token = localStorage.getItem('token');
+        const ws = new WebSocket(`${SERVER_URL}?token=${token}`);
         let playerName = localStorage.getItem('username');
         let opponentName;
         let gameId;

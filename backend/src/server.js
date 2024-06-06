@@ -131,6 +131,25 @@ app.post('/signin', (req, res) => {
     });
 });
 
+// Cognito logoff endpoint
+app.post('/logoff', (req, res) => {
+    const { token } = req.body;
+
+    const params = {
+        Token: token,
+        ClientId: 'YOUR_APP_CLIENT_ID' // Replace with your App Client ID
+    };
+
+    cognito.revokeToken(params, (err, data) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json({ error: err.message });
+        } else {
+            res.json({ message: 'User logged off and token invalidated' });
+        }
+    });
+});
+
 // WebSocket connection with token verification
 wss.on('connection', async (ws, req) => {
     const token = req.url.split('?token=')[1];

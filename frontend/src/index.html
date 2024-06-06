@@ -11,6 +11,11 @@
         .form-container {
             display: inline-block;
             text-align: left;
+            margin: 20px; /* Add space between the form containers */
+            padding: 20px;
+            border: 1px solid #ddd; /* Optional: Add border for better separation */
+            border-radius: 8px; /* Optional: Add border radius for rounded corners */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better separation */
         }
         input, button {
             display: block;
@@ -23,6 +28,10 @@
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3; /* Optional: Add hover effect for button */
         }
     </style>
 </head>
@@ -101,17 +110,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                alert(data.error);
-            } else {
-                localStorage.setItem('username', username);
-                localStorage.setItem('token', data.tokens.IdToken);  // Store the ID token for authentication
-                alert('Sign in successful!');
-                alert('Your token is: ' + data.tokens.IdToken);
-                window.location.href = 'game.html';
+                    alert(data.error);
+                } else {
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('token', data.tokens.IdToken);  // Store the ID token for authentication
+                    alert('Sign in successful!');
+                    alert('Your token is: ' + data.tokens.IdToken);
+                    window.location.href = 'game.html';
+                }
+            });
         }
-    });
-}
-
     </script>
 </body>
 </html>

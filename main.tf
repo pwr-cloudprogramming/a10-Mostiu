@@ -178,6 +178,7 @@ resource "aws_instance" "server" {
   PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
   sudo sed -i "s|const SERVER_URL = '.*';|const SERVER_URL = 'http://"$PUBLIC_IP":8080';|" /var/www/html/index.html
   sudo sed -i "s|const SERVER_URL = '.*';|const SERVER_URL = 'ws://"$PUBLIC_IP":8080';|" /var/www/html/game.html
+  sudo sed -i "s|const SERVER_URL_HTTP = '.*';|const SERVER_URL_HTTP = 'http://"$PUBLIC_IP":8080';|" /var/www/html/game.html
   sudo sed -i "s|YOUR_USER_POOL_ID|${aws_cognito_user_pool.main.id}|g" /var/www/html/game.html
   sudo sed -i "s|YOUR_APP_CLIENT_ID|${aws_cognito_user_pool_client.main.id}|g" /var/www/html/game.html
 

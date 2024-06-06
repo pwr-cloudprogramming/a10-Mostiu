@@ -118,7 +118,15 @@ app.post('/signin', (req, res) => {
             console.log(err);
             res.status(500).json({ error: err.message });
         } else {
-            res.json({ message: 'User signed in', data });
+            const { IdToken, AccessToken, RefreshToken } = data.AuthenticationResult;
+            res.json({
+                message: 'User signed in',
+                tokens: {
+                    IdToken,
+                    AccessToken,
+                    RefreshToken
+                }
+            });
         }
     });
 });

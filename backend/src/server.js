@@ -169,7 +169,7 @@ function broadcastGameResult(game, result) {
     console.log(`Broadcasting game result: ${result}`);
     game.players.forEach(player => {
         if (players[player]) {
-            players[player].send(JSON.stringify({ type: 'game_result', result }));
+            players[player].send(JSON.stringify({ type: 'game_result', result, board: game.board }));
         }
     });
 }

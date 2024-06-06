@@ -80,8 +80,8 @@
                     updateBoard(data.game.board);
                     break;
                 case 'game_result':
-                    updateBoard(data.game.board); // Update the board to show the last move
-                    displayResult(data.result);
+                    updateBoard(data.board); // Update the board to show the last move
+                    setTimeout(() => displayResult(data.result), 50); // Delay to ensure the board is updated before showing the result
                     break;
                 case 'error':
                     alert(data.message);

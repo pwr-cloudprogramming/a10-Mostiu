@@ -22,6 +22,14 @@
         .cell.taken {
             cursor: not-allowed;
         }
+        .button {
+            padding: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -33,6 +41,7 @@
     <h3>Board</h3>
     <div class="board" id="board" style="pointer-events: none;"></div>
     <h3 id="result"></h3>
+    <button class="button" onclick="logOff()">Log Off</button>
     <script>
         const SERVER_URL = 'ws://YOUR_SERVER_IP:8080';  // Update this to your WebSocket server URL
         const ws = new WebSocket(SERVER_URL);
@@ -71,6 +80,7 @@
                     updateBoard(data.game.board);
                     break;
                 case 'game_result':
+                    updateBoard(data.game.board); // Update the board to show the last move
                     displayResult(data.result);
                     break;
                 case 'error':
@@ -146,6 +156,12 @@
                 resultDiv.innerText = `Player ${result} wins!`;
             }
             document.getElementById('board').style.pointerEvents = 'none';
+        }
+
+        function logOff() {
+            localStorage.removeItem('username');
+            localStorage.removeItem('token');
+            window.location.href = 'index.html';
         }
     </script>
 </body>

@@ -133,10 +133,10 @@ app.post('/signin', (req, res) => {
 
 // Cognito logoff endpoint
 app.post('/logoff', (req, res) => {
-    const { token } = req.body;
+    const { refreshToken } = req.body;
 
     const params = {
-        Token: token,
+        Token: refreshToken,
         ClientId: 'YOUR_APP_CLIENT_ID' // Replace with your App Client ID
     };
 

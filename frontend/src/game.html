@@ -161,25 +161,26 @@
         }
 
         function logOff() {
-            const token = localStorage.getItem('token');
+    const refreshToken = localStorage.getItem('refreshToken');
 
-            fetch(`${SERVER_URL_HTTP}/logoff`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                } else {
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('token');
-                    alert('Logged off successfully!');
-                    window.location.href = 'index.html';
-                }
-            });
+    fetch(`${SERVER_URL_HTTP}/logoff`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            localStorage.removeItem('username');
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            alert('Logged off successfully!');
+            window.location.href = 'index.html';
         }
+    });
+}
     </script>
 </body>
 </html>
